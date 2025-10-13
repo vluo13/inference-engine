@@ -1,0 +1,3 @@
+/Users/vincentluo/projects/hermes/backend/hermes-core/build/CMakeFiles/hermes_core.dir
+/Users/vincentluo/projects/hermes/backend/hermes-core/build/CMakeFiles/edit_cache.dir
+/Users/vincentluo/projects/hermes/backend/hermes-core/build/CMakeFiles/rebuild_cache.dir

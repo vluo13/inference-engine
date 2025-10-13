@@ -1,0 +1,2 @@
+/usr/bin/ar qc libhermes_core.a CMakeFiles/hermes_core.dir/src/Tensor.cpp.o
+/usr/bin/ranlib libhermes_core.a
