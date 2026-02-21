@@ -46,3 +46,5 @@ gpt2/*.bin
 # Compiled Python (if any scripting)
 __pycache__/
 *.pyc
+
+resources.txt

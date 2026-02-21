@@ -1,20 +1,37 @@
 # CMake version
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 4.1)
 
-# Define the project
-project(Hermes_Core LANGUAGES CXX)
+# project name
+project(inference-engine LANGUAGES CXX)
 
-# Set C++ standard to C++20
-set(CMAKE_CXX_STANDARD 20)
+# set to C++17
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Define the library target
-add_library(hermes_core STATIC
-    src/Tensor.cpp
-    #src/engine.cpp
-    #src/KVcache.cpp
-    #src/kernels.cpp
+
+# create tensor library
+# add_library(tensor src/Tensor.cpp include/tensor/Tensor.h)
+# target_include_directories(tensor PUBLIC include)
+
+# Download GTest
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+FetchContent_MakeAvailable(googletest)
+
+# Testing
+enable_testing()
+
+add_executable(
+  hello_test
+  test/hello_test.cpp
+)
+target_link_libraries(
+  hello_test
+  GTest::gtest_main
 )
 
-# Add include directories
-target_include_directories(hermes_core PUBLIC include)
+include(GoogleTest)
+gtest_discover_tests(hello_test)
