@@ -18,6 +18,7 @@ _deps/
 *.dylib
 *.dll
 *.exe
+*.out
 
 # macOS
 .DS_Store
@@ -34,7 +35,7 @@ cmake-build-debug/
 cmake-build-release/
 
 # Model weights and binary data
-gpt2/*.bin
+weights
 *.bin
 *.pt
 *.ckpt
@@ -48,3 +49,4 @@ __pycache__/
 *.pyc
 
 resources.txt
+notes.txt
