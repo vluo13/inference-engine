@@ -70,24 +70,12 @@ namespace hermes {
     Tensor Tensor::reshape(std::vector<size_t> newShape) const {
         assert(numel(shape_) == numel(newShape));
 
-        if (contiguous()) {
+        if (isContiguous()) {
             std::vector<size_t> newStrides = computeStrides(newShape);
             return Tensor {data_, std::move(newShape), std::move(newStrides), offset_};
         }
         else {
-            Tensor result {std::move(newShape)};
-
-            size_t ndim = shape_.size();
-            size_t count = numel(shape_);
-            std::vector<size_t> indices(ndim);
-            for (size_t i = 0; i < count; ++i) {
-                result.dataPtr()[i] = at(indices);
-                if (i + 1 == count) break; // guard against underflow on final interation
-
-                incrementOdometer(indices, shape_, ndim);
-            }
-
-            return result;
+            return contiguous().reshape(std::move(newShape));
         }
     }
 
@@ -150,6 +138,38 @@ namespace hermes {
     }
 
     /**
+     * @brief Checks whether the data of a tensor is contiguous in memory
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool Tensor::isContiguous() const{
+        return computeStrides(shape_) == strides_;
+    }
+
+    /**
+     * @brief Makes a tensor contiguous in memorhy
+     */
+    Tensor Tensor::contiguous() const {
+        if (isContiguous()) {
+            return *this;
+        }
+        Tensor result {shape_};
+
+        size_t ndim = shape_.size();
+        size_t count = numel(shape_);
+        std::vector<size_t> indices(ndim);
+        for (size_t i = 0; i < count; ++i) {
+            result.dataPtr()[i] = at(indices);
+            if (i + 1 == count) break; // guard against underflow on final interation
+
+            incrementOdometer(indices, shape_, ndim);
+        }
+
+        return result;
+    }
+
+    /**
      * @brief Returns the total number of elements in a tensor with dimensions given by shape
      * 
      * @param shape 
@@ -166,7 +186,7 @@ namespace hermes {
     }
 
     /**
-     * @brief Helper function to determine the offset of the value at the index given by indices
+     * @brief Helper function to determine the offset of the value at the index given by indices. Does not account for offset.
      * 
      * @param indices 
      * @return size_t 
@@ -264,14 +284,4 @@ namespace hermes {
         , shape_(shape)
         , strides_(strides)
         , offset_(offset) {}
-
-    /**
-     * @brief Checks whether the data of a tensor is contiguous in memory
-     * 
-     * @return true 
-     * @return false 
-     */
-    bool Tensor::contiguous() const{
-        return computeStrides(shape_) == strides_;
-    }
 }

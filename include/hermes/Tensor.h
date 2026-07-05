@@ -26,6 +26,8 @@ namespace hermes {
         const float* dataPtr() const;
         const std::vector<size_t>& shape() const;
         const std::vector<size_t>& strides() const;
+        bool isContiguous() const;
+        Tensor contiguous() const;
 
         static size_t numel(const std::vector<size_t>& shape);
         static size_t linearIndex(const std::vector<size_t>& indices, const std::vector<size_t>& strides);
@@ -40,7 +42,6 @@ namespace hermes {
         size_t offset_ {0};
         
         Tensor(std::shared_ptr<float> data, std::vector<size_t> shape, std::vector<size_t> strides, size_t offset);
-        bool contiguous() const;
     };
 }
 

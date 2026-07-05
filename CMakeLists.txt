@@ -26,10 +26,11 @@ enable_testing()
 
 add_executable(
   hermes_test
-  # tests/tensor_test.cpp
-  # tests/ops_test.cpp
-  # tests/utils_test.cpp
+  tests/tensor_test.cpp
+  tests/ops_test.cpp
+  tests/utils_test.cpp
   tests/kernels_test.cpp
+  tests/test_utils.h
 )
 target_link_libraries(
   hermes_test
