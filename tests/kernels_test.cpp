@@ -7,7 +7,6 @@
 #include <limits>
 #include <vector>
 #include <stdexcept>
-#include <iostream>
 
 namespace {
 hermes::Tensor makeTensor(std::vector<size_t> shape, std::vector<float> values) {
@@ -18,30 +17,28 @@ hermes::Tensor makeTensor(std::vector<size_t> shape, std::vector<float> values) 
 }
 } 
 
-const std::string TensorDir = TENSOR_DIR;
-
 TEST(Gelu, Zero) {
-	hermes::Tensor input = loadTensor(TensorDir + "gelu_zero_in.bin");
-	hermes::Tensor expected = loadTensor(TensorDir + "gelu_zero_out.bin");
+	hermes::Tensor input = loadTensor(TENSOR_DIR"gelu_zero_in.bin");
+	hermes::Tensor expected = loadTensor(TENSOR_DIR"gelu_zero_out.bin");
 	expectTensorEq(expected, hermes::gelu(input), 1e-5f);
 }
 
 TEST(Gelu, Neg) {
-	hermes::Tensor input = loadTensor(TensorDir + "gelu_neg_in.bin");
-	hermes::Tensor expected = loadTensor(TensorDir + "gelu_neg_out.bin");
+	hermes::Tensor input = loadTensor(TENSOR_DIR"gelu_neg_in.bin");
+	hermes::Tensor expected = loadTensor(TENSOR_DIR"gelu_neg_out.bin");
 	expectTensorEq(expected, gelu(input), 1e-5f);
 }
 
 TEST(Gelu, Large) {
-	hermes::Tensor input = loadTensor(TensorDir + "gelu_large_in.bin");
-	hermes::Tensor expected = loadTensor(TensorDir + "gelu_large_out.bin");
+	hermes::Tensor input = loadTensor(TENSOR_DIR"gelu_large_in.bin");
+	hermes::Tensor expected = loadTensor(TENSOR_DIR"gelu_large_out.bin");
 	expectTensorEq(expected, gelu(input), 1e-5f);
 }
 
 TEST(GeLURand, MatchesPyTorch) {
     for (int i = 0; i < 4; ++i) {
         SCOPED_TRACE("gelu_rand case " + std::to_string(i));
-        std::string base = TensorDir + "gelu_rand_" + std::to_string(i);
+        std::string base =  TENSOR_DIR"gelu_rand_" + std::to_string(i);
         hermes::Tensor in  = loadTensor(base + "_in.bin");
         hermes::Tensor ref = loadTensor(base + "_out.bin");
         expectTensorEq(ref, gelu(in), 1e-4f);
@@ -123,7 +120,7 @@ TEST(LayerNorm, HandlesTransposedView) {
 TEST(LayerNormRand, MatchesPyTorch) {
     for (int i = 0; i < 4; ++i) {
         SCOPED_TRACE("layernorm_rand case " + std::to_string(i));
-        std::string base = TensorDir + "layernorm_rand_" + std::to_string(i);
+        std::string base = TENSOR_DIR"layernorm_rand_" + std::to_string(i);
         hermes::Tensor in  = loadTensor(base + "_in.bin");
         hermes::Tensor w   = loadTensor(base + "_w.bin");
         hermes::Tensor b   = loadTensor(base + "_b.bin");
@@ -219,7 +216,7 @@ TEST(Softmax, HandlesTransposedView) {
 TEST(SoftmaxRand, MatchesPyTorch) {
     for (int i = 0; i < 5; ++i) {
         SCOPED_TRACE("softmax_rand case " + std::to_string(i));
-        std::string base = TensorDir + "softmax_rand_" + std::to_string(i);
+        std::string base = TENSOR_DIR"softmax_rand_" + std::to_string(i);
         hermes::Tensor in  = loadTensor(base + "_in.bin");
         hermes::Tensor ref = loadTensor(base + "_out.bin");
         expectTensorEq(ref, hermes::softmax(in), 1e-5f);
@@ -269,9 +266,6 @@ TEST(Matmul, HandlesBothOperandsTransposed) {
     ASSERT_EQ(a.shape(), (std::vector<size_t>{2,3}));
     ASSERT_EQ(b.shape(), (std::vector<size_t>{3,4}));
 
-    std::cout << a.shape()[0] << " " << a.shape()[1] << std::endl;
-    std::cout << b.shape()[0] << " " << b.shape()[1] << std::endl;
-
     hermes::Tensor got = hermes::matmul(a, b);
     expectTensorEq(makeTensor({2, 4}, {22, 49, 76, 103, 28, 64, 100, 136}),
                    got, 1e-5f);
@@ -280,7 +274,7 @@ TEST(Matmul, HandlesBothOperandsTransposed) {
 TEST(MatmulRand, MatchesPyTorch) {
     for (int i = 0; i < 5; ++i) {
         SCOPED_TRACE("matmul_rand case " + std::to_string(i));
-        std::string base = TensorDir + "matmul_rand_" + std::to_string(i);
+        std::string base = TENSOR_DIR"matmul_rand_" + std::to_string(i);
         hermes::Tensor a   = loadTensor(base + "_a.bin");
         hermes::Tensor b   = loadTensor(base + "_b.bin");
         hermes::Tensor ref = loadTensor(base + "_out.bin");
@@ -339,7 +333,7 @@ TEST(Bmm, HandlesTransposedOperand) {
 TEST(BmmRand, MatchesPyTorch) {
     for (int i = 0; i < 3; ++i) {
         SCOPED_TRACE("bmm_rand case " + std::to_string(i));
-        std::string base = TensorDir + "bmm_rand_" + std::to_string(i);
+        std::string base = TENSOR_DIR"bmm_rand_" + std::to_string(i);
         hermes::Tensor a   = loadTensor(base + "_a.bin");
         hermes::Tensor b   = loadTensor(base + "_b.bin");
         hermes::Tensor ref = loadTensor(base + "_out.bin");

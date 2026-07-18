@@ -53,16 +53,16 @@ Tensor CausalSelfAttention::forward(const Tensor& x) const {
     k = k.reshape(newShape).transpose(0, 1); // (n_heads, T, n_embed / n_heads)
     v = v.reshape(newShape).transpose(0, 1); // (n_heads, T, n_embed / n_heads)
     Tensor qkt = bmm(q, k.transpose(k.shape().size() - 1,  k.shape().size() - 2)); // (n_heads, T, T)
-    qkt = div(qkt, std::sqrt(embed_ / heads_));
+    qkt = div(qkt, static_cast<float>(std::sqrt(embed_ / heads_)));
     // mask each head
     size_t head_stride = Tensor::numel(qkt.shape()) / heads_;
     size_t tokens = qkt.shape().back();
-    for (int i = 0; i < heads_; ++i) {
+    for (size_t i = 0; i < heads_; ++i) {
         float* scores = qkt.dataPtr() + (i * head_stride);
-        for (int j = 0; j < tokens; ++j) {
-            for (int k = 0; k < tokens; ++k) {
-                if (k > j) {
-                    scores[j*tokens + k] = -std::numeric_limits<float>::infinity();
+        for (size_t row = 0; row < tokens; ++row) {
+            for (size_t col = 0; col < tokens; ++col) {
+                if (col > row) {
+                    scores[row*tokens + col] = -std::numeric_limits<float>::infinity();
                 }
             }
         }
@@ -125,7 +125,7 @@ GPT2 GPT2::load(const std::string& weights) {
         fpos += sizeof(size_t);
 
         std::string name(name_length, '\0');
-        reader.read(name.data(), name_length);
+        reader.read(name.data(), static_cast<std::streamsize>(name_length));
         fpos += name_length;
 
         size_t ndims;
@@ -133,7 +133,7 @@ GPT2 GPT2::load(const std::string& weights) {
         fpos += sizeof(size_t);
 
         std::vector<size_t> shape(ndims);
-        reader.read(reinterpret_cast<char*>(shape.data()), ndims * sizeof(size_t));
+        reader.read(reinterpret_cast<char*>(shape.data()), static_cast<std::streamsize>(ndims * sizeof(size_t)));
         fpos += ndims * sizeof(size_t);
 
         size_t offset;
@@ -145,7 +145,7 @@ GPT2 GPT2::load(const std::string& weights) {
     }
 
     for (const auto& [name, nbytes] : tensor_sizes) {
-        reader.read(reinterpret_cast<char*>(state_dict.at(name).dataPtr()), nbytes);
+        reader.read(reinterpret_cast<char*>(state_dict.at(name).dataPtr()), static_cast<std::streamsize>(nbytes));
     }
     
     return load(state_dict, GPT2Config {layers, heads, embed, block_size, vocab_size});
@@ -186,7 +186,6 @@ Tensor GPT2::forward(const Tensor& x) const {
 
 std::vector<int> GPT2::generate(const std::vector<int>& tokens, size_t max_length) const{
     std::vector<int> output = tokens;
-    size_t generated = 0;
     while (output.size() < block_size_ && output.size() < max_length) {
         // convert tokens to a float Tensor 
         Tensor tokTensor {std::vector<size_t>{output.size()}};
@@ -208,8 +207,7 @@ std::vector<int> GPT2::generate(const std::vector<int>& tokens, size_t max_lengt
                 maxLogit = lastDim.dataPtr()[i];
             }
         }
-        output.push_back(maxIdx);
-        ++generated;
+        output.push_back(static_cast<int>(maxIdx));
         std::cout << maxIdx << ",";
         std::cout.flush(); 
     }

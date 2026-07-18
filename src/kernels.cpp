@@ -162,7 +162,7 @@ Tensor bmm(const Tensor& a, const Tensor& b) {
     size_t bElems = K * N;
     size_t outElems = M * N;
     size_t matrices = Tensor::numel(resultShape) / outElems;
-    for (int i = 0; i < matrices; ++i) {
+    for (size_t i = 0; i < matrices; ++i) {
         size_t aOffset = i * aElems;
         size_t bOffset = i * bElems;
         size_t resultOffset = i * outElems;

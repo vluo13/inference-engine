@@ -38,7 +38,7 @@ hermes::Tensor makeSeq(size_t T) {
 TEST(GPT2Forward, Prompt8) {
     std::vector<int> tokens = {15496, 11, 314, 1101, 257, 3303, 2746, 11};
     hermes::Tensor expected = loadTensor(
-        "/Users/admin/Desktop/inference-engine/tests/data/logits_prompt8.bin");
+        TENSOR_DIR"logits_prompt8.bin");
     expectTensorEq(expected, model().forward(toTensor(tokens)), 1e-3f);
 }
 
@@ -46,21 +46,21 @@ TEST(GPT2Forward, SingleToken) {
     // T=1: degenerate causal mask (attends only to itself), first wpe row only.
     std::vector<int> tokens = {15496};
     hermes::Tensor expected = loadTensor(
-        "/Users/admin/Desktop/inference-engine/tests/data/logits_single.bin");
+        TENSOR_DIR"logits_single.bin");
     expectTensorEq(expected, model().forward(toTensor(tokens)), 1e-3f);
 }
 
 TEST(GPT2Forward, Long300) {
     // Large T×T mask, deep into wpe. Bugs invisible at T=8 surface here.
     hermes::Tensor expected = loadTensor(
-        "/Users/admin/Desktop/inference-engine/tests/data/logits_long300.bin");
+        TENSOR_DIR"logits_long300.bin");
     expectTensorEq(expected, model().forward(makeSeq(300)), 1e-3f);
 }
 
 TEST(GPT2Forward, MaxBlockSize) {
     // T=1024 exactly: wpe has 1024 rows, so this is the off-by-one boundary.
     hermes::Tensor expected = loadTensor(
-        "/Users/admin/Desktop/inference-engine/tests/data/logits_max1024.bin");
+        TENSOR_DIR"logits_max1024.bin");
     expectTensorEq(expected, model().forward(makeSeq(1024)), 1e-3f);
 }
 
