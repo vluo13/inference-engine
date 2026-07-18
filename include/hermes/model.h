@@ -1,3 +1,107 @@
+#ifndef HERMES_MODEL_H
+#define HERMES_MODEL_H
+
+#include <vector>
+#include <string>
+#include <unordered_map>
+
+#include "hermes/Tensor.h"
+
+namespace hermes {
+
+struct GPT2Config {
+    size_t layers;
+    size_t heads;
+    size_t embed;
+    size_t block_size;
+    size_t vocab_size;
+};
+
+struct LayerNormWeights {
+    Tensor ln_weight;
+    Tensor ln_bias;
+};
+
+struct AttentionWeights {
+    Tensor attn_weight;
+    Tensor attn_bias;
+    Tensor proj_weight;
+    Tensor proj_bias;
+};
+
+struct MLPWeights {
+    Tensor fc_weight;
+    Tensor fc_bias;
+    Tensor proj_weight;
+    Tensor proj_bias;
+};
+
+struct TransformerWeights {
+    LayerNormWeights ln1;
+    AttentionWeights attn;
+    LayerNormWeights ln2;
+    MLPWeights mlp;
+};
+
+class MLP 
+{
+public:
+    MLP(size_t in, size_t out, MLPWeights weights);
+    Tensor forward(const Tensor& x) const;
+private:
+    size_t in_;
+    size_t out_;
+    MLPWeights weights_;
+};
+
+class CausalSelfAttention 
+{
+public:
+    CausalSelfAttention(size_t heads, size_t embed, AttentionWeights weights);
+    Tensor forward(const Tensor& x) const;
+private:
+    size_t heads_;
+    size_t embed_;
+    AttentionWeights weights_;
+};
+
+class Transformer
+{
+public:
+    Transformer(size_t heads, size_t embed, TransformerWeights weights);
+    Tensor forward(const Tensor& x) const;
+private:
+    size_t heads_;
+    size_t embed_;
+    LayerNormWeights ln1_;
+    CausalSelfAttention attn_;
+    LayerNormWeights ln2_;
+    MLP mlp_;
+};
+
+class GPT2 
+{
+public:
+    static GPT2 load(const std::string& weights);
+    static GPT2 load(const std::unordered_map<std::string, Tensor>& state_dict, const GPT2Config& config);
+    Tensor forward(const Tensor& x) const;
+    std::vector<int> generate(const std::vector<int>& tokens, size_t max_length=1024) const;
+private:
+    size_t block_size_;
+    size_t vocab_size_;
+    Tensor wte_;
+    Tensor wpe_;
+    Tensor ln_f_weight_;
+    Tensor ln_f_bias_;
+    std::vector<Transformer> transformers_;
+
+    GPT2(size_t block_size, size_t vocab_size, Tensor wte, Tensor wpe, Tensor ln_f_weight, Tensor ln_f_bias, std::vector<Transformer> transformers);
+};
+
+}
+
+#endif
+
 // https://github.com/karpathy/llm.c/blob/master/train_gpt2.py
 
 // vocab_size is the total number of tokens

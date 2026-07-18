@@ -6,8 +6,10 @@
 #include <vector>
 
 namespace hermes {
-    void incrementOdometer(std::vector<size_t>& indices, const std::vector<size_t>& shape, size_t ndim);
-    Tensor loadTensor(const std::string& path);
+
+void incrementOdometer(std::vector<size_t>& indices, const std::vector<size_t>& shape, size_t ndim);
+Tensor embedding(const Tensor& x, const Tensor& table);
+
 }
 
 #endif
